@@ -1,5 +1,6 @@
-// In-memory fallback for dev or when KV not configured
-let memState = {
+import { createClient } from '@supabase/supabase-js';
+
+const defaultState = {
   phase: 'idle',
   teamId: 1,
   questionIndex: 0,
@@ -9,30 +10,41 @@ let memState = {
   solvedIds: [],
 };
 
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
-    try {
-      const { kv } = await import('@vercel/kv');
-      const state = await kv.get('quiz:state');
-      res.json(state || memState);
-    } catch {
-      res.json(memState);
-    }
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('quiz_state')
+      .select('state')
+      .eq('id', 1)
+      .single();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data.state || defaultState);
   } else if (req.method === 'POST') {
     const update = req.body;
-    try {
-      const { kv } = await import('@vercel/kv');
-      const current = await kv.get('quiz:state') || memState;
-      const newState = { ...current, ...update };
-      await kv.set('quiz:state', newState, { ex: 86400 });
-      memState = newState;
-      res.json(newState);
-    } catch {
-      memState = { ...memState, ...update };
-      res.json(memState);
-    }
+    const supabase = getSupabase();
+    const { data: current, error: fetchError } = await supabase
+      .from('quiz_state')
+      .select('state')
+      .eq('id', 1)
+      .single();
+    if (fetchError) return res.status(500).json({ error: fetchError.message });
+    const newState = { ...(current.state || defaultState), ...update };
+    const { error: updateError } = await supabase
+      .from('quiz_state')
+      .update({ state: newState })
+      .eq('id', 1);
+    if (updateError) return res.status(500).json({ error: updateError.message });
+    res.json(newState);
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
