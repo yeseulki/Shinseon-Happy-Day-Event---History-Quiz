@@ -1,0 +1,309 @@
+{
+  "event": "신선 행복DAY · 역사를 알자",
+  "date": "2026-07-14",
+  "note": "각 조는 2문제를 풉니다. 진행 시 이 목록에서 순서대로 또는 무작위로 2문제를 뽑아 사용하세요.",
+  "questions": [
+    {
+      "id": 1,
+      "category": "한국사",
+      "question": "고조선의 사회 질서를 유지하기 위해 시행되었던, 살인·상해·절도 등을 처벌한 법 조항은 무엇인가?",
+      "answer": "8조법",
+      "hint": "○조법",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 2,
+      "category": "한국사",
+      "question": "한강 유역을 차지하고 중국 요서 지방까지 진출하며 백제의 전성기를 이끈 이 왕은 누구인가?",
+      "answer": "근초고왕",
+      "hint": "○초○왕",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 3,
+      "category": "한국사",
+      "question": "신라 최초의 여왕으로, 첨성대를 세운 것으로 알려진 이 왕은 누구인가?",
+      "answer": "선덕여왕",
+      "hint": "ㅡ🦆여왕",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 4,
+      "category": "한국사",
+      "question": "신라 진흥왕이 인재를 양성하기 위해 정비한, 청소년 수련 단체는 무엇인가?",
+      "answer": "화랑도",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q04_hwarangdo.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 5,
+      "category": "한국사",
+      "question": "신라의 혈통에 따라 관직 진출과 생활 전반을 엄격히 제한했던 신분 제도는 무엇인가?",
+      "answer": "골품제도",
+      "hint": "GOALPUMJEDO",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 6,
+      "category": "한국사",
+      "question": "고구려의 장군으로, 살수(청천강)에서 수나라의 대군을 크게 무찌른 살수대첩을 이끈 이 인물은 누구인가?",
+      "answer": "을지문덕",
+      "hint": "○○○○",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 7,
+      "category": "한국사",
+      "question": "후삼국을 통일하고 고려를 건국한 인물은 누구인가?",
+      "answer": "왕건",
+      "hint": "🫅🔫",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": ["태조"],
+      "note": "'태조'는 시호이므로 정답으로 인정하지 않음. 반드시 '왕건'이어야 정답."
+    },
+    {
+      "id": 8,
+      "category": "한국사",
+      "question": "고려 후기 화약 제조 기술을 도입하여 화포 개발의 기반을 마련한 인물은 누구인가?",
+      "answer": "최무선",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q08_choemuseon.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 9,
+      "category": "한국사",
+      "question": "현재 남아있는 것 중 세계 최초의 금속활자 인쇄본으로 인정받는 고려의 불교 서적은 무엇인가?",
+      "answer": "직지심체요절",
+      "hint": "ㅈㅈㅅㅊㅇㅈ",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 10,
+      "category": "한국사",
+      "question": "조선 시대 최고의 국립 교육 기관으로, 유학 교육과 관리 양성을 담당했던 곳은 어디인가?",
+      "answer": "성균관",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q10_seonggyungwan.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 11,
+      "category": "한국사",
+      "question": "조선 태종이 백성들의 억울한 일을 직접 알리도록 대궐 밖에 설치한 북은 무엇인가?",
+      "answer": "신문고",
+      "hint": "📰고",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 12,
+      "category": "한국사",
+      "question": "조선 후기 실학자 정약용이 지방관이 지켜야 할 도리를 정리하여 저술한 책은 무엇인가?",
+      "answer": "목민심서",
+      "hint": "목民心서",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 13,
+      "category": "한국사",
+      "question": "1876년 조선이 일본과 맺은 최초의 근대적 조약이자 불평등 조약은 무엇인가?",
+      "answer": "강화도 조약",
+      "hint": "🚣‍♀️🔥🏝️ 조약",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 14,
+      "category": "한국사",
+      "question": "1894년 전봉준을 중심으로 일어난 대규모 농민 봉기는 무엇인가?",
+      "answer": "동학 농민 운동",
+      "hint": "ㄷㅎㄴㅁㅇㄷ",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 15,
+      "category": "한국사",
+      "question": "1895년 일본이 명성황후를 시해한 사건을 무엇이라 하는가?",
+      "answer": "을미사변",
+      "hint": "ㅇㅁㅅㅂ",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 16,
+      "category": "한국사",
+      "question": "1905년 일본이 대한제국의 외교권을 강제로 빼앗기 위해 체결한 이 조약은 무엇인가?",
+      "answer": "을사늑약",
+      "hint": "ㅇㅅㄴㅇ",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 17,
+      "category": "한국사",
+      "question": "유관순 열사가 독립 만세운동을 펼친 것으로 유명한 장터는 어디인가?",
+      "answer": "아우내장터",
+      "hint": "○○○장터",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 18,
+      "category": "한국사",
+      "question": "3·1 운동 이후 조직적인 독립운동을 위해 수립된 대한민국 임시정부가 처음 자리했던 중국의 도시는 어디인가?",
+      "answer": "상하이",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q18_shanghai.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 19,
+      "category": "한국사",
+      "question": "일본의 무조건 항복으로 우리나라가 35년간의 일제 강점에서 벗어나게 된 이 해는 언제인가?",
+      "answer": "1945년",
+      "hint": "다음을 만족하는 네 자리 수 ABCD를 구해보세요 → A=1, B=A+8, C=B−5, D=C+1",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 20,
+      "category": "세계사",
+      "question": "6·25 전쟁 당시 인천 상륙 작전을 지휘한 UN군 사령관은 누구인가?",
+      "answer": "맥아더",
+      "hint": "MacArthur 장군",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 21,
+      "category": "세계사",
+      "question": "고대 인도에서 성립되어 지금까지도 영향을 미치는 신분 계급 제도는 무엇인가?",
+      "answer": "카스트제도",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q21_caste.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 22,
+      "category": "세계사",
+      "question": "시민들이 직접 정치에 참여하는 민주주의가 처음 발달한 고대 도시국가는 어디인가?",
+      "answer": "아테네",
+      "hint": "그리스에 있어요",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 23,
+      "category": "세계사",
+      "question": "몽골 부족을 통일하고 역사상 가장 넓은 대제국을 건설한 인물은 누구인가?",
+      "answer": "칭기스칸",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q23_genghiskhan.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 24,
+      "category": "세계사",
+      "question": "마르코 폴로가 아시아 여행 경험을 기록하여 유럽에 동양에 대한 관심을 불러일으킨 이 책은 무엇인가?",
+      "answer": "동방견문록",
+      "hint": "ㄷㅂㄱㅁ록",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 25,
+      "category": "세계사",
+      "question": "유럽 중세 말, 인구의 상당수를 앗아간 대유행병으로 '검은 죽음'이라고도 불리는 이 전염병은 무엇인가?",
+      "answer": "흑사병",
+      "hint": "영어로는 'Black Death'",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 26,
+      "category": "세계사",
+      "question": "명예혁명, 미국 독립혁명과 함께 근대 3대 시민혁명으로 꼽히는, 절대왕정을 무너뜨린 이 혁명은 무엇인가?",
+      "answer": "프랑스 혁명",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q26_eiffeltower.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 27,
+      "category": "세계사",
+      "question": "프랑스 혁명 이후 쿠데타로 권력을 잡아 스스로 황제의 자리에 오른 인물은 누구인가?",
+      "answer": "나폴레옹",
+      "hint": "사진을 확인해보세요!",
+      "hint_type": "image",
+      "image": "images/q27_napoleon.png",
+      "invalid_answers": []
+    },
+    {
+      "id": 28,
+      "category": "세계사",
+      "question": "\"해가 지지 않는 나라\"라 불릴 만큼 19세기에 전 세계에 걸쳐 식민지를 거느렸던 이 나라는 어디인가?",
+      "answer": "대영제국",
+      "hint": "○영○국",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    },
+    {
+      "id": 29,
+      "category": "세계사",
+      "question": "제1차 세계대전의 직접적인 계기가 된 암살 사건은 무엇인가?",
+      "answer": "사라예보 사건",
+      "hint": "SARAJEVO 사건",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": [],
+      "note": "2026-07-12에 기존 문항(제1차 세계대전 계기 → 정답: 제1차 세계대전)에서 교체됨"
+    },
+    {
+      "id": 30,
+      "category": "세계사",
+      "question": "제1차 세계대전을 마무리하며 독일에 막대한 배상 책임을 지운 이 조약은 무엇인가?",
+      "answer": "베르사유 조약",
+      "hint": "ㅂㄹㅅㅇ 조약",
+      "hint_type": "text",
+      "image": null,
+      "invalid_answers": []
+    }
+  ]
+}

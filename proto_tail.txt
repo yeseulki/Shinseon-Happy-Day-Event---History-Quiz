@@ -1,0 +1,104 @@
+351:           <path d="M12 2 L14 9 L21 9 L15 13.5 L17.5 21 L12 16.5 L6.5 21 L9 13.5 L3 9 L10 9 Z" stroke-linejoin="round"/>
+352:         </svg>
+353:         <p class="wait-label">문제를 기다리고 있어요</p>
+354:         <p class="wait-sub">출제자가 곧 문제를 시작합니다</p>
+355:       </div>
+356: 
+357:       <!-- 문제 상태 -->
+358:       <div class="state" id="state-question">
+359:         <div class="category-tag">한국사</div>
+360:         <div class="question-text" id="questionText">한강 유역을 차지하고 중국 요서 지방까지 진출하며 백제의 전성기를 이끈 이 왕은 누구인가?</div>
+361:         <div class="raise-hand-hint"><span class="hand">✋</span>손을 들고 답을 외쳐보세요!</div>
+362:       </div>
+363: 
+364:       <!-- 힌트 상태 (문제 상태 위에 겹쳐 나옴) -->
+365:       <div class="state" id="state-hint">
+366:         <div class="category-tag">한국사</div>
+367:         <div class="question-text" id="questionText2">한강 유역을 차지하고 중국 요서 지방까지 진출하며 백제의 전성기를 이끈 이 왕은 누구인가?</div>
+368:         <div class="hint-card">
+369:           <div class="hint-icon">?</div>
+370:           <div class="hint-text" id="hintText">힌트: 이름에 '근초고'가 들어가요. 백제 13대 왕이에요.</div>
+371:         </div>
+372:         <div class="raise-hand-hint"><span class="hand">✋</span>손을 들고 답을 외쳐보세요!</div>
+373:       </div>
+374: 
+375:       <!-- 정답 상태 -->
+376:       <div class="state" id="state-answer">
+377:         <svg class="answer-icon" viewBox="0 0 24 24" fill="none">
+378:           <circle cx="12" cy="12" r="10" fill="#4FD69C"/>
+379:           <path d="M7 12.5 L10.5 16 L17 8.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+380:         </svg>
+381:         <div class="answer-label">정답</div>
+382:         <div class="answer-text" id="answerText">근초고왕</div>
+383:       </div>
+384: 
+385:     </div>
+386:   </div>
+387: </div>
+388: 
+389: <!-- 프로토타입 전용 컨트롤 -->
+390: <div class="proto-controls">
+391:   <span class="label">PROTOTYPE CONTROL</span>
+392:   <button class="primary" onclick="showQuestion()">① 문제 시작</button>
+393:   <button class="yellow" onclick="showHint()">② 힌트 열기</button>
+394:   <button class="pink" onclick="showAnswer()">③ 정답 공개</button>
+395:   <button onclick="resetStage()">리셋</button>
+396: </div>
+397: 
+398: <script>
+399: const states = ['state-idle','state-question','state-hint','state-answer'];
+400: function setState(id){
+401:   states.forEach(s => document.getElementById(s).classList.toggle('active', s===id));
+402: }
+403: 
+404: let timerInterval = null;
+405: const TOTAL = 45; // 1차 풀이 45초 기준 (2문항/225초 설계)
+406: let remaining = TOTAL;
+407: 
+408: function startTimer(){
+409:   clearInterval(timerInterval);
+410:   remaining = TOTAL;
+411:   const prog = document.getElementById('timerProg');
+412:   const num = document.getElementById('timerNum');
+413:   document.getElementById('idleLabel').style.display = 'none';
+414:   document.getElementById('timerWrap').style.display = 'flex';
+415:   prog.style.background = 'var(--pink)';
+416:   prog.style.transform = 'scaleX(1)';
+417:   num.textContent = remaining;
+418:   timerInterval = setInterval(() => {
+419:     remaining--;
+420:     num.textContent = Math.max(remaining,0);
+421:     prog.style.transform = `scaleX(${Math.max(remaining,0)/TOTAL})`;
+422:     if(remaining <= 10){ prog.style.background = '#FF5C7A'; }
+423:     if(remaining <= 0){ clearInterval(timerInterval); }
+424:   }, 1000);
+425: }
+426: 
+427: function showQuestion(){
+428:   setState('state-question');
+429:   startTimer();
+430: }
+431: function showHint(){
+432:   setState('state-hint');
+433: }
+434: function showAnswer(){
+435:   clearInterval(timerInterval);
+436:   document.getElementById('timerWrap').style.display = 'none';
+437:   document.getElementById('idleLabel').textContent = '정답 공개!';
+438:   document.getElementById('idleLabel').style.display = 'inline';
+439:   setState('state-answer');
+440:   const card = document.getElementById('card');
+441:   card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+442: }
+443: function resetStage(){
+444:   clearInterval(timerInterval);
+445:   document.getElementById('timerWrap').style.display = 'none';
+446:   const idle = document.getElementById('idleLabel');
+447:   idle.textContent = '문제를 기다리는 중';
+448:   idle.style.display = 'inline';
+449:   setState('state-idle');
+450: }
+451: </script>
+452: 
+453: </body>
+454: </html>

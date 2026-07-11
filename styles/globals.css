@@ -1,0 +1,48 @@
+@font-face {
+  font-family: 'A2Z';
+  src: url('/fonts/A2Z-w500.woff2') format('woff2'), url('/fonts/A2Z-w500.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'A2Z';
+  src: url('/fonts/A2Z-w600.woff2') format('woff2'), url('/fonts/A2Z-w600.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'A2Z';
+  src: url('/fonts/A2Z-w700.woff2') format('woff2'), url('/fonts/A2Z-w700.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'A2Z';
+  src: url('/fonts/A2Z-w900.woff2') format('woff2'), url('/fonts/A2Z-w900.ttf') format('truetype');
+  font-weight: 900;
+  font-display: swap;
+}
+
+:root {
+  --sky: #2CADD9;
+  --sky-deep: #1C8FB8;
+  --pink: #FF8FA3;
+  --yellow: #FFC94A;
+  --navy: #1B3358;
+  --ink: #20242C;
+  --cream: #FFFCF6;
+  --line: #DCE6EC;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'A2Z', 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+}
