@@ -27,23 +27,21 @@ export default async function handler(req, res) {
       .select('state')
       .eq('id', 1)
       .single();
-    if (error) return res.status(500).json({ error: error.message });
+    if (error || !data) return res.json(defaultState);
     res.json(data.state || defaultState);
   } else if (req.method === 'POST') {
     const update = req.body;
     const supabase = getSupabase();
-    const { data: current, error: fetchError } = await supabase
+    const { data: current } = await supabase
       .from('quiz_state')
       .select('state')
       .eq('id', 1)
       .single();
-    if (fetchError) return res.status(500).json({ error: fetchError.message });
-    const newState = { ...(current.state || defaultState), ...update };
-    const { error: updateError } = await supabase
+    const newState = { ...(current?.state || defaultState), ...update };
+    const { error: upsertError } = await supabase
       .from('quiz_state')
-      .update({ state: newState })
-      .eq('id', 1);
-    if (updateError) return res.status(500).json({ error: updateError.message });
+      .upsert({ id: 1, state: newState });
+    if (upsertError) return res.status(500).json({ error: upsertError.message });
     res.json(newState);
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
