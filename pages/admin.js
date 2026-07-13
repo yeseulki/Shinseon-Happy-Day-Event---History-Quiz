@@ -3,6 +3,18 @@ import Head from 'next/head';
 
 const POLL_INTERVAL = 1500;
 
+const EMPTY_QUESTION = {
+  id: null,
+  category: '한국사',
+  question: '',
+  answer: '',
+  hint: '',
+  hint_type: 'text',
+  image: null,
+  invalid_answers: [],
+  note: '',
+};
+
 export default function AdminPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -16,9 +28,16 @@ export default function AdminPage() {
     solvedIds: [],
   });
   const [questions, setQuestions] = useState([]);
+  const [questionsMetadata, setQuestionsMetadata] = useState({});
   const [timerDisplay, setTimerDisplay] = useState(90);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 문제 편집 모달
+  const [editModal, setEditModal] = useState(null); // null | { mode: 'add'|'edit', draft: {...} }
+  const [isSavingQ, setIsSavingQ] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // 선택 중인 문제 (시작 전에만 변경 가능)
   const [selectedQ0, setSelectedQ0] = useState(null);
@@ -27,16 +46,21 @@ export default function AdminPage() {
   const timerIntervalRef = useRef(null);
   const pollIntervalRef = useRef(null);
 
-  useEffect(() => {
+  const loadQuestions = useCallback(() => {
     fetch('/questions.json')
       .then((r) => r.json())
       .then((data) => {
         const qs = data.questions || [];
         setQuestions(qs);
-        setSelectedQ0(qs[0]?.id ?? null);
-        setSelectedQ1(qs[1]?.id ?? null);
+        setQuestionsMetadata({ event: data.event, date: data.date, note: data.note });
+        setSelectedQ0((prev) => prev ?? (qs[0]?.id ?? null));
+        setSelectedQ1((prev) => prev ?? (qs[1]?.id ?? null));
       });
   }, []);
+
+  useEffect(() => {
+    loadQuestions();
+  }, [loadQuestions]);
 
   // 폴링
   useEffect(() => {
@@ -123,6 +147,117 @@ export default function AdminPage() {
   const handleReset = () => {
     if (!window.confirm('진행 중인 문제를 종료하고 대기 화면으로 돌아갈까요?')) return;
     postState({ phase: 'idle', questionIndex: 0, questionId: null, timerStartedAt: null });
+  };
+
+  // 문제 편집/추가 핸들러
+  const openAddModal = () => {
+    const maxId = questions.reduce((m, q) => Math.max(m, q.id), 0);
+    setEditModal({
+      mode: 'add',
+      draft: { ...EMPTY_QUESTION, id: maxId + 1 },
+      invalidAnswersText: '',
+    });
+  };
+
+  const openEditModal = (q) => {
+    setEditModal({
+      mode: 'edit',
+      draft: { ...q },
+      invalidAnswersText: (q.invalid_answers || []).join(', '),
+    });
+  };
+
+  const closeModal = () => setEditModal(null);
+
+  const updateDraft = (field, value) => {
+    setEditModal((prev) => ({ ...prev, draft: { ...prev.draft, [field]: value } }));
+  };
+
+  const handleImageFile = (file) => {
+    if (!file) return;
+    const MAX = 10 * 1024 * 1024;
+    if (file.size > MAX) { alert('파일 크기는 10MB 이하여야 합니다.'); return; }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(',')[1];
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, contentType: file.type, data: base64 }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'upload failed');
+        updateDraft('image', json.url);
+      } catch (err) {
+        alert('이미지 업로드 실패: ' + err.message);
+      }
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveQuestion = async () => {
+    const { draft, invalidAnswersText } = editModal;
+    if (!draft.question.trim() || !draft.answer.trim()) {
+      alert('문제와 정답은 필수입니다.');
+      return;
+    }
+    const invalid = invalidAnswersText
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const finalQ = {
+      ...draft,
+      invalid_answers: invalid,
+      image: draft.hint_type === 'image' ? (draft.image || null) : null,
+      note: draft.note || undefined,
+    };
+    if (!finalQ.note) delete finalQ.note;
+
+    let newQuestions;
+    if (editModal.mode === 'add') {
+      newQuestions = [...questions, finalQ];
+    } else {
+      newQuestions = questions.map((q) => (q.id === finalQ.id ? finalQ : q));
+    }
+
+    const payload = { ...questionsMetadata, questions: newQuestions };
+    setIsSavingQ(true);
+    try {
+      const res = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('save failed');
+      setQuestions(newQuestions);
+      closeModal();
+    } catch {
+      alert('저장에 실패했습니다. 다시 시도해주세요.');
+    }
+    setIsSavingQ(false);
+  };
+
+  const deleteQuestion = async (qId) => {
+    if (!window.confirm('이 문제를 삭제할까요?')) return;
+    const newQuestions = questions.filter((q) => q.id !== qId);
+    const payload = { ...questionsMetadata, questions: newQuestions };
+    setIsSavingQ(true);
+    try {
+      const res = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('save failed');
+      setQuestions(newQuestions);
+    } catch {
+      alert('삭제에 실패했습니다.');
+    }
+    setIsSavingQ(false);
   };
 
   // 문제 선택 핸들러 (슬롯 0 or 1)
@@ -414,6 +549,195 @@ export default function AdminPage() {
         }
         .slot-summary-item.active-slot { border-color: #2CADD9; background: #EBF7FC; }
         .slot-arrow { color: #8A97A6; font-size: 11px; margin: 0 2px; }
+
+        /* 편집 버튼 */
+        .btn-edit {
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 11px;
+          border: 1.5px solid #DCE6EC;
+          border-radius: 6px;
+          padding: 3px 8px;
+          cursor: pointer;
+          background: #fff;
+          color: #8A97A6;
+          transition: all 0.1s;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .btn-edit:hover { border-color: #8B5CF6; color: #8B5CF6; }
+
+        .btn-add-q {
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 13px;
+          border: 2px dashed #DCE6EC;
+          border-radius: 8px;
+          padding: 8px 16px;
+          cursor: pointer;
+          background: transparent;
+          color: #8A97A6;
+          transition: all 0.15s;
+          width: 100%;
+          margin-top: 8px;
+        }
+        .btn-add-q:hover { border-color: #22C55E; color: #22C55E; }
+
+        /* 모달 오버레이 */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .modal {
+          background: #fff;
+          border-radius: 20px;
+          padding: 28px 28px 24px;
+          width: 100%;
+          max-width: 560px;
+          max-height: 90vh;
+          overflow-y: auto;
+          color: #1B3358;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .modal-title {
+          font-weight: 900;
+          font-size: 18px;
+          color: #1B3358;
+        }
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .form-label {
+          font-weight: 700;
+          font-size: 11px;
+          color: #8A97A6;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+        .form-input, .form-select, .form-textarea {
+          font-family: 'A2Z', 'Noto Sans KR', sans-serif;
+          font-size: 14px;
+          border: 1.5px solid #DCE6EC;
+          border-radius: 8px;
+          padding: 10px 12px;
+          color: #1B3358;
+          background: #F8FAFC;
+          transition: border-color 0.15s;
+          outline: none;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+          border-color: #2CADD9;
+          background: #fff;
+        }
+        .form-textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+        .form-row {
+          display: flex;
+          gap: 12px;
+        }
+        .form-row .form-group { flex: 1; }
+
+        .modal-footer {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          padding-top: 4px;
+          border-top: 1px solid #F1F5F9;
+          margin-top: 4px;
+        }
+        .btn-modal-cancel {
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          border: 1.5px solid #DCE6EC;
+          border-radius: 10px;
+          padding: 11px 20px;
+          cursor: pointer;
+          background: #fff;
+          color: #8A97A6;
+          transition: all 0.15s;
+        }
+        .btn-modal-cancel:hover { border-color: #64748B; color: #64748B; }
+        .btn-modal-save {
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          border: none;
+          border-radius: 10px;
+          padding: 11px 24px;
+          cursor: pointer;
+          background: #2CADD9;
+          color: #fff;
+          transition: opacity 0.15s;
+        }
+        .btn-modal-save:hover:not(:disabled) { opacity: 0.85; }
+        .btn-modal-save:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-modal-delete {
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          border: 1.5px solid #FCA5A5;
+          border-radius: 10px;
+          padding: 11px 16px;
+          cursor: pointer;
+          background: #fff;
+          color: #EF4444;
+          transition: all 0.15s;
+          margin-right: auto;
+        }
+        .btn-modal-delete:hover { background: #FEF2F2; }
+
+        .hint-type-row {
+          display: flex;
+          gap: 8px;
+        }
+        .hint-type-btn {
+          flex: 1;
+          font-family: 'A2Z', sans-serif;
+          font-weight: 700;
+          font-size: 13px;
+          border: 1.5px solid #DCE6EC;
+          border-radius: 8px;
+          padding: 9px;
+          cursor: pointer;
+          background: #F8FAFC;
+          color: #8A97A6;
+          transition: all 0.15s;
+        }
+        .hint-type-btn.active { border-color: #FFC94A; background: #FEF9C3; color: #CA8A04; }
+
+        /* 이미지 업로드 */
+        .img-upload-zone {
+          border: 2px dashed #DCE6EC;
+          border-radius: 10px;
+          padding: 20px 16px;
+          text-align: center;
+          cursor: pointer;
+          background: #F8FAFC;
+          transition: border-color 0.15s, background 0.15s;
+          min-height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .img-upload-zone:hover { border-color: #2CADD9; background: #EBF7FC; }
+        .img-upload-status {
+          font-size: 14px;
+          color: #8A97A6;
+          line-height: 1.8;
+        }
       `}</style>
 
       <div className="page">
@@ -505,9 +829,188 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* 문제 편집 모달 */}
+        {editModal && (
+          <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+            <div className="modal">
+              <div className="modal-title">
+                {editModal.mode === 'add' ? '➕ 문제 추가' : `✏️ 문제 #${editModal.draft.id} 편집`}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group" style={{ maxWidth: 80 }}>
+                  <div className="form-label">번호</div>
+                  <input
+                    className="form-input"
+                    type="number"
+                    value={editModal.draft.id ?? ''}
+                    onChange={(e) => updateDraft('id', Number(e.target.value))}
+                    disabled={editModal.mode === 'edit'}
+                  />
+                </div>
+                <div className="form-group">
+                  <div className="form-label">분류</div>
+                  <select
+                    className="form-select"
+                    value={editModal.draft.category}
+                    onChange={(e) => updateDraft('category', e.target.value)}
+                  >
+                    <option value="한국사">한국사</option>
+                    <option value="세계사">세계사</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="form-label">문제</div>
+                <textarea
+                  className="form-textarea"
+                  value={editModal.draft.question}
+                  onChange={(e) => updateDraft('question', e.target.value)}
+                  placeholder="문제 텍스트를 입력하세요"
+                />
+              </div>
+
+              <div className="form-group">
+                <div className="form-label">정답</div>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={editModal.draft.answer}
+                  onChange={(e) => updateDraft('answer', e.target.value)}
+                  placeholder="정답"
+                />
+              </div>
+
+              <div className="form-group">
+                <div className="form-label">힌트 유형</div>
+                <div className="hint-type-row">
+                  <button
+                    className={`hint-type-btn${editModal.draft.hint_type === 'text' ? ' active' : ''}`}
+                    onClick={() => updateDraft('hint_type', 'text')}
+                  >
+                    📝 텍스트
+                  </button>
+                  <button
+                    className={`hint-type-btn${editModal.draft.hint_type === 'image' ? ' active' : ''}`}
+                    onClick={() => updateDraft('hint_type', 'image')}
+                  >
+                    🖼 이미지
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="form-label">힌트 텍스트</div>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={editModal.draft.hint}
+                  onChange={(e) => updateDraft('hint', e.target.value)}
+                  placeholder={editModal.draft.hint_type === 'image' ? '이미지 설명 (예: 사진을 확인해보세요!)' : '힌트 텍스트 (예: ○조법)'}
+                />
+              </div>
+
+              {editModal.draft.hint_type === 'image' && (
+                <div className="form-group">
+                  <div className="form-label">힌트 이미지</div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleImageFile(e.target.files?.[0])}
+                  />
+                  <div
+                    className="img-upload-zone"
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleImageFile(e.dataTransfer.files?.[0]);
+                    }}
+                  >
+                    {isUploading ? (
+                      <div className="img-upload-status">⏳ 업로드 중…</div>
+                    ) : editModal.draft.image ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                        <img
+                          src={editModal.draft.image}
+                          alt="힌트 이미지 미리보기"
+                          style={{ maxHeight: 140, maxWidth: '100%', borderRadius: 8, objectFit: 'contain' }}
+                        />
+                        <span style={{ fontSize: 11, color: '#8A97A6' }}>클릭하면 다른 이미지로 교체</span>
+                      </div>
+                    ) : (
+                      <div className="img-upload-status">
+                        📁 클릭하거나 사진을 여기에 끌어놓으세요<br />
+                        <span style={{ fontSize: 11, color: '#8A97A6' }}>PC 파일 · 핸드폰 사진첩 · 드래그&드롭</span>
+                      </div>
+                    )}
+                  </div>
+                  {editModal.draft.image && !isUploading && (
+                    <button
+                      style={{ marginTop: 4, fontSize: 11, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+                      onClick={() => updateDraft('image', null)}
+                    >
+                      ✕ 이미지 제거
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="form-group">
+                <div className="form-label">오답 처리 목록 (쉼표로 구분)</div>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={editModal.invalidAnswersText}
+                  onChange={(e) => setEditModal((prev) => ({ ...prev, invalidAnswersText: e.target.value }))}
+                  placeholder="예: 태조, 세조"
+                />
+              </div>
+
+              <div className="form-group">
+                <div className="form-label">관리자 메모 (선택)</div>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={editModal.draft.note || ''}
+                  onChange={(e) => updateDraft('note', e.target.value)}
+                  placeholder="예: '태조'는 시호이므로 오답 처리"
+                />
+              </div>
+
+              <div className="modal-footer">
+                {editModal.mode === 'edit' && (
+                  <button
+                    className="btn-modal-delete"
+                    onClick={() => { deleteQuestion(editModal.draft.id); closeModal(); }}
+                  >
+                    🗑 삭제
+                  </button>
+                )}
+                <button className="btn-modal-cancel" onClick={closeModal}>취소</button>
+                <button
+                  className="btn-modal-save"
+                  onClick={saveQuestion}
+                  disabled={isSavingQ}
+                >
+                  {isSavingQ ? '저장 중…' : '저장'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 문제 목록 */}
         <div className="panel">
-          <div className="panel-title">문제 선택</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div className="panel-title" style={{ marginBottom: 0 }}>문제 선택</div>
+            <button className="btn-edit" style={{ fontSize: 12, padding: '4px 12px' }} onClick={openAddModal}>
+              ➕ 문제 추가
+            </button>
+          </div>
 
           {/* 현재 선택된 슬롯 요약 */}
           <div className="slots-summary">
@@ -565,11 +1068,19 @@ export default function AdminPage() {
                     >
                       2
                     </button>
+                    <button
+                      className="btn-edit"
+                      onClick={(e) => { e.stopPropagation(); openEditModal(q); }}
+                      title="문제 편집"
+                    >
+                      ✏️
+                    </button>
                   </div>
                 </div>
               );
             })}
           </div>
+          <button className="btn-add-q" onClick={openAddModal}>➕ 새 문제 추가</button>
         </div>
       </div>
     </>
