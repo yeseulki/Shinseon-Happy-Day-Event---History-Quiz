@@ -37,7 +37,7 @@ export default function PlayPage() {
   const cardRef = useRef(null);
 
   const loadQuestions = useCallback(() => {
-    fetch('/questions.json?t=' + Date.now())
+    fetch('/api/questions')
       .then((r) => r.json())
       .then((data) => setQuestions(data.questions || []));
   }, []);

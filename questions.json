@@ -71,7 +71,9 @@
       "hint": "🫅🔫",
       "hint_type": "text",
       "image": null,
-      "invalid_answers": ["태조"],
+      "invalid_answers": [
+        "태조"
+      ],
       "note": "'태조'는 시호이므로 정답으로 인정하지 않음. 반드시 '왕건'이어야 정답."
     },
     {

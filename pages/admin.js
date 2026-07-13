@@ -47,7 +47,7 @@ export default function AdminPage() {
   const pollIntervalRef = useRef(null);
 
   const loadQuestions = useCallback(() => {
-    fetch('/questions.json')
+    fetch('/api/questions')
       .then((r) => r.json())
       .then((data) => {
         const qs = data.questions || [];

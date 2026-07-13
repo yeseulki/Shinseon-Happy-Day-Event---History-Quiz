@@ -1,14 +1,26 @@
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import defaultQuestions from '../../questions.json';
 
-const DATA_PATH = path.join(process.cwd(), 'questions.json');
-const PUBLIC_PATH = path.join(process.cwd(), 'public', 'questions.json');
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+
   if (req.method === 'GET') {
     try {
-      const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-      return res.status(200).json(JSON.parse(raw));
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from('quiz_questions')
+        .select('data')
+        .eq('id', 1)
+        .single();
+      if (error || !data) return res.status(200).json(defaultQuestions);
+      return res.status(200).json(data.data);
     } catch (e) {
       return res.status(500).json({ error: 'Failed to read questions' });
     }
@@ -17,10 +29,11 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const body = req.body;
-      // body should be the full questions JSON object
-      const json = JSON.stringify(body, null, 2);
-      fs.writeFileSync(DATA_PATH, json, 'utf-8');
-      fs.writeFileSync(PUBLIC_PATH, json, 'utf-8');
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from('quiz_questions')
+        .upsert({ id: 1, data: body });
+      if (error) throw error;
       return res.status(200).json(body);
     } catch (e) {
       return res.status(500).json({ error: 'Failed to save questions' });
