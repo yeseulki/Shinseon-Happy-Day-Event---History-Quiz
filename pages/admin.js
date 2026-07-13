@@ -149,6 +149,11 @@ export default function AdminPage() {
     postState({ phase: 'idle', questionIndex: 0, questionId: null, timerStartedAt: null });
   };
 
+  const handleClearSolved = () => {
+    if (!window.confirm('풀이 완료 표시를 모두 초기화할까요?')) return;
+    postState({ solvedIds: [] });
+  };
+
   // 문제 편집/추가 핸들러
   const openAddModal = () => {
     const maxId = questions.reduce((m, q) => Math.max(m, q.id), 0);
@@ -1007,9 +1012,16 @@ export default function AdminPage() {
         <div className="panel">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div className="panel-title" style={{ marginBottom: 0 }}>문제 선택</div>
-            <button className="btn-edit" style={{ fontSize: 12, padding: '4px 12px' }} onClick={openAddModal}>
-              ➕ 문제 추가
-            </button>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {solvedIds.length > 0 && (
+                <button className="btn-edit" style={{ fontSize: 12, padding: '4px 12px', borderColor: '#FCA5A5', color: '#EF4444' }} onClick={handleClearSolved}>
+                  ↺ 현황 초기화
+                </button>
+              )}
+              <button className="btn-edit" style={{ fontSize: 12, padding: '4px 12px' }} onClick={openAddModal}>
+                ➕ 문제 추가
+              </button>
+            </div>
           </div>
 
           {/* 현재 선택된 슬롯 요약 */}
