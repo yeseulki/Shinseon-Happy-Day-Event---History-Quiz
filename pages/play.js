@@ -38,20 +38,28 @@ export default function PlayPage() {
 
   const loadQuestions = useCallback(() => {
     fetch('/api/questions')
-      .then((r) => r.json())
-      .then((data) => setQuestions(data.questions || []));
+      .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+      .then((data) => {
+        if (data.questions) setQuestions(data.questions);
+      })
+      .catch(() => {
+        // API 실패 시 정적 파일로 폴백
+        fetch('/questions.json')
+          .then((r) => r.json())
+          .then((data) => setQuestions(data.questions || []));
+      });
   }, []);
 
   // Load questions on mount
   useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
-  // 모르는 questionId가 오면 다시 로드
+  // questionId가 있는데 questions에 없으면 다시 로드 (questions가 로드된 후에도 재체크)
   useEffect(() => {
     if (!state.questionId) return;
     if (!questions.find((q) => q.id === state.questionId)) {
       loadQuestions();
     }
-  }, [state.questionId]);
+  }, [state.questionId, questions.length]);
 
   // Polling
   useEffect(() => {
