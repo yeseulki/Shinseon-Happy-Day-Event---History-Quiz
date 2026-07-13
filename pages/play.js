@@ -542,7 +542,7 @@ export default function PlayPage() {
                     <div className="hint-image-wrap">
                       <img
                         className="hint-image"
-                        src={`/${currentQuestion.image}`}
+                        src={currentQuestion.image}
                         alt="힌트 이미지"
                       />
                     </div>
