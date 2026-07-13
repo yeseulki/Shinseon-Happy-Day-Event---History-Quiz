@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 
 const POLL_INTERVAL = 1500;
@@ -36,12 +36,22 @@ export default function PlayPage() {
   const pollIntervalRef = useRef(null);
   const cardRef = useRef(null);
 
-  // Load questions once
-  useEffect(() => {
-    fetch('/questions.json')
+  const loadQuestions = useCallback(() => {
+    fetch('/questions.json?t=' + Date.now())
       .then((r) => r.json())
       .then((data) => setQuestions(data.questions || []));
   }, []);
+
+  // Load questions on mount
+  useEffect(() => { loadQuestions(); }, [loadQuestions]);
+
+  // 모르는 questionId가 오면 다시 로드
+  useEffect(() => {
+    if (!state.questionId) return;
+    if (!questions.find((q) => q.id === state.questionId)) {
+      loadQuestions();
+    }
+  }, [state.questionId]);
 
   // Polling
   useEffect(() => {
